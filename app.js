@@ -1,30 +1,33 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
+const cookieParser = require('cookie-parser');
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const { errorHandler, handleNotFound } = require('./middlewares/errorHandler');
+const { validateUser } = require('./validation/validation');
+const { auth } = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+app.use(cookieParser());
+app.use(express.json());
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.post('/signin', validateUser, login);
+app.post('/signup', validateUser, createUser);
+app.use(auth);
+app.use(userRouter);
+app.use(cardRouter);
+app.use(errors());
+app.use(handleNotFound);
+app.use(errorHandler);
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+const start = async () => {
+  await mongoose.connect('mongodb://localhost:27017/mestodb');
+  // eslint-disable-next-line no-console
+  app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+};
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '63f105beb1d271ea1be71fd8',
-  };
-
-  next();
-});
-app.use('/', require('./routes/users'));
-app.use('/', require('./routes/cards'));
-
-app.use((req, res) => {
-  res.status(404).send({
-    message: 'Страница не найдена',
-  });
-});
-
-app.listen(PORT);
+start();
