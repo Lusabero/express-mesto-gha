@@ -41,7 +41,7 @@ const createCard = (req, res, next) => {
 
   Card.create({ name, link, owner })
     .then((card) => {
-      res.status(200).send({
+      res.status(201).send({
         name: card.name,
         link: card.link,
         owner: card.owner,
