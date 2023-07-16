@@ -13,3 +13,4 @@ node_modules
 # Optional REPL history
 .DS_Store
 .vscode
+.env
