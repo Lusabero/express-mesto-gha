@@ -1,13 +1,17 @@
 const jwt = require('jsonwebtoken');
 const { ApiError } = require('../errors/ApiError');
 
-const { NODE_ENV, JWT_SECRET = 'some-secret-key' } = process.env;
+const { JWT_SECRET = 'some-secret-key' } = process.env;
 
 const auth = (req, res, next) => {
-  const token = req.cookies.jwt;
+  const { authorization } = req.headers;
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    throw ApiError.unauthirizedError();
+  }
+  const token = authorization.replace('Bearer ', '');
   let payload;
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
     throw ApiError.unauthirizedError();
   }
