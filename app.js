@@ -15,11 +15,16 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { PORT = 3001 } = process.env;
 
 const app = express();
+const corsOption = {
+    credentials: true,
+    origin: 'https://mesto.lusabero.nomoredomains.xyz'
+}
+
+app.use(cors(corsOption));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
 
-app.use(cors());
 app.get('/crash-test', () => {
     setTimeout(() => {
         throw new Error('Сервер сейчас упадёт');
